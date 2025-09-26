@@ -1,14 +1,7 @@
 {
-  "version": 2,
-  "functions": {
-    "api/index.js": {
-      "runtime": "vercel-bun@latest"
-    }
-  },
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/api/index.js"
-    }
-  ]
+  "name": "hianime-api",
+  "version": "1.0.0",
+  "devDependencies": {
+    "bun-vercel": "latest"
+  }
 }
