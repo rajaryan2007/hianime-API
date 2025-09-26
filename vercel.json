@@ -1,7 +1,4 @@
 {
-  "name": "hianime-api",
-  "version": "2.0.0",
-  "devDependencies": {
-    "bun-vercel": "latest"
-  }
+  "version": 2,
+  "buildCommand": "bun run build"
 }
