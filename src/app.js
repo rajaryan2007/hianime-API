@@ -8,8 +8,10 @@ import hiAnimeRoutes from './routes/routes.js';
 
 import { AppError } from './utils/errors.js';
 import { fail } from './utils/response.js';
-import hianimeApiDocs from './utils/swaggerUi.js';
 import { logger } from 'hono/logger';
+import apiDocs from './controllers/apiDocs.controller.js';
+import clearCache from './controllers/clearCache.controller.js';
+import handler from './utils/handler.js';
 
 const app = new Hono();
 
@@ -30,32 +32,38 @@ app.use(
 // Apply the rate limiting middleware to all requests.
 app.use(
   rateLimiter({
-    windowMs: process.env.RATE_LIMIT_WINDOW_MS || 60000,
-    limit: process.env.RATE_LIMIT_LIMIT || 100,
+    windowMs: process.env.RATE_LIMIT_WINDOW_MS || 60 * 1000,
+    limit: process.env.RATE_LIMIT_LIMIT || 20,
     standardHeaders: 'draft-6', // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
-    keyGenerator: () => '<unique_key>', // Method to generate custom identifiers for clients.
-    // store: ... , // Redis, MemoryStore, etc. See below.
+    keyGenerator: (c) => {
+      const ip = (c.req.header('x-forwarded-for') || '').split(',')[0].trim();
+      return ip;
+    },
   })
 );
 
 // middlewares
-
+// app.use('/api/v1/*', protect);
 // routes
 
 app.use('/api/v1/*', logger());
 
 app.get('/', (c) => {
   c.status(200);
-  return c.text('welcome to anime API 🎉 start by hitting /api/v1 for documentation');
+  return c.text('welcome to anime API 🎉 goto /ui for docs');
 });
 app.get('/ping', (c) => {
   return c.text('pong');
 });
 app.route('/api/v1', hiAnimeRoutes);
-app.get('/doc', (c) => c.json(hianimeApiDocs));
+
+app.get('/doc', apiDocs);
 
 // Use the middleware to serve Swagger UI at /ui
 app.get('/ui', swaggerUI({ url: '/doc' }));
+
+app.get('/clear/cache', handler(clearCache));
+
 app.onError((err, c) => {
   if (err instanceof AppError) {
     return fail(c, err.message, err.statusCode, err.details);

@@ -11,6 +11,7 @@ export const extractDetailpage = (html) => {
     poster: null,
     rating: null,
     type: null,
+    is18Plus: null,
     episodes: {
       sub: null,
       dub: null,
@@ -27,7 +28,7 @@ export const extractDetailpage = (html) => {
     status: null,
     MAL_score: null,
     genres: [],
-    studios: null,
+    studios: [],
     producers: [],
     moreSeasons: [],
     related: [],
@@ -45,6 +46,7 @@ export const extractDetailpage = (html) => {
 
   // extract about info
   obj.poster = main.find('.film-poster .film-poster-img').attr('src');
+  obj.is18Plus = Boolean(main.find('.film-poster .tick-rate').length > 0);
 
   const titleEl = main.find('.anisc-detail .film-name');
   obj.title = titleEl.text();
@@ -112,7 +114,10 @@ export const extractDetailpage = (html) => {
           .get();
         break;
       case 'Studios:':
-        obj.studios = $(el).find('a').text();
+        obj.studios = $(el)
+          .find('a')
+          .map((i, studio) => $(studio).attr('href').split('/').at(-1))
+          .get();
         break;
       case 'Producers:':
         obj.producers = $(el)
