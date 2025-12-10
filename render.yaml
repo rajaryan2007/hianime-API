@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: hianime-api
+    env: node
+    plan: free
+    region: singapore
+    buildCommand: "bun install"
+    startCommand: "node src/app.js"
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
